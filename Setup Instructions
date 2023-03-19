@@ -1,0 +1,185 @@
+# Part 1: Setup OpenAI ChatGPT.  Start with installation.
+
+pip install openai
+
+# Import
+
+import openai
+openai.api_key = "YOUR_API_KEY"
+
+# Run
+
+prompt = "Hello, how are you?"
+response = openai.Completion.create(
+  engine="davinci",
+  prompt=prompt,
+  temperature=0.5,
+  max_tokens=256,
+  top_p=1,
+  frequency_penalty=0,
+  presence_penalty=0
+)
+
+message = response.choices[0].text.strip()
+print(message)
+
+# Part 2: Setup for conversational memory.
+
+pip install sqlite3
+
+import sqlite3
+
+conn = sqlite3.connect('conversation.db')
+c = conn.cursor()
+
+c.execute('CREATE TABLE IF NOT EXISTS conversation (id INTEGER PRIMARY KEY, message TEXT, response TEXT)')
+
+conn.commit()
+conn.close()
+
+# Example of saving simple conversation.
+
+import sqlite3
+
+conn = sqlite3.connect('conversation.db')
+c = conn.cursor()
+
+message = "Hello"
+response = "Hi there"
+
+c.execute('INSERT INTO conversation (message, response) VALUES (?, ?)', (message, response))
+
+conn.commit()
+conn.close()
+
+# Simple conversation handling.
+
+import sqlite3
+
+conn = sqlite3.connect('conversation.db')
+c = conn.cursor()
+
+c.execute('SELECT * FROM conversation')
+
+for row in c.fetchall():
+  print(row)
+
+conn.close()
+
+# CRITICAL: Maintain conversational context:
+
+import sqlite3
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+def get_response(message):
+    conn = sqlite3.connect('conversation.db')
+    c = conn.cursor()
+
+    c.execute('INSERT INTO conversation (message) VALUES (?)', (message,))
+
+    # Get the last 5 messages from the conversation history
+    c.execute('SELECT * FROM conversation ORDER BY id DESC LIMIT 5')
+    conversation = [row[1] for row in reversed(c.fetchall())]
+
+    prompt = "\n".join(conversation)
+    response = openai.Completion.create(
+      engine="davinci",
+      prompt=prompt,
+      temperature=0.5,
+      max_tokens=60,
+      top_p=1,
+      frequency_penalty=0,
+      presence_penalty=0
+    )
+
+    message = response.choices[0].text.strip()
+
+    c.execute('INSERT INTO conversation (response) VALUES (?)', (message,))
+    conn.commit()
+    conn.close()
+
+    return message
+
+
+# Part 3: Sample execution control.
+
+import openai
+
+openai.api_key = "YOUR_API_KEY"
+
+prompt = "Hello, how are you?"
+response = openai.Completion.create(
+  engine="davinci",
+  prompt=prompt,
+  temperature=0.5,
+  max_tokens=60,
+  top_p=1,
+  frequency_penalty=0,
+  presence_penalty=0
+)
+
+message = response.choices[0].text.strip()
+
+if "good" in message:
+  print("That's great!")
+elif "bad" in message:
+  print("I'm sorry to hear that.")
+else:
+  print("I don't understand.")
+``
+
+#### Important note from ChatGPT on its limitatinos below:
+
+As an AI language model, I don't have a name or a personal identity like a human being does. You can refer to me as "ChatGPT" or "the AI model", but I don't have the ability to recognize or respond to an assigned name like a human being would.
+
+That being said, you can certainly refer to me using a specific name or label to help distinguish me from other agents in a conversation. For example, if you're talking to multiple AI models with different capabilities, you could refer to me as "the language model" or "the chatbot" to distinguish me from the other models.
+
+Ultimately, the name or label you choose to use is up to you and won't affect my ability to generate responses to your prompts. I'll simply respond to the prompts you provide, regardless of how you refer to me.
+
+#### CRITICAL: Correct parameters for ChatGPT.
+
+response = openai.Completion.create(
+    engine="davinci",
+    prompt=prompt,
+    temperature=0.7,
+    max_tokens=150,
+    top_p=1,
+    frequency_penalty=0.5,
+    presence_penalty=0.5
+)
+
+
+Explanation from ChatGPT itself:
+
+Certainly! Based on our conversation so far, the following parameters for openai.Completion.create would likely replicate the behavior you observe from me now:
+
+response = openai.Completion.create(
+    engine="davinci",
+    prompt=prompt,
+    temperature=0.7,
+    max_tokens=150,
+    top_p=1,
+    frequency_penalty=0.5,
+    presence_penalty=0.5
+)
+
+
+Here's an explanation of each parameter and why I think these values would produce similar behavior to what you're experiencing:
+
+    engine: The ID of the GPT-3 language model to use for generating the response. In our conversation, I'm using a model called ChatGPT, which is based on GPT-3. The closest equivalent in the OpenAI API would be the davinci engine, which is one of the most powerful and capable models in the GPT-3 family. This is set to "davinci".
+    prompt: The text prompt that the model should use as a starting point for generating the response. This is based on your input prompts during our conversation. You would pass in your prompt as the prompt parameter.
+    temperature: Controls the "creativity" or "randomness" of the generated response. In our conversation, I'm generating responses that are somewhat varied, but not completely random. A temperature of 0.7 would produce similar behavior.
+    max_tokens: The maximum number of tokens (words or word-like units) that the model should generate as a response. In our conversation, I'm generating responses that are relatively concise, but still able to convey the necessary information. A max_tokens value of 150 would produce similar behavior.
+    top_p: A way to control the "diversity" of the generated response. In our conversation, I'm generating responses that are reasonably diverse, but not too divergent from the input prompts. A top_p value of 1 would produce similar behavior.
+    frequency_penalty: A penalty factor that discourages the model from repeating the same words or phrases in the generated response. In our conversation, I'm generating responses that don't repeat themselves excessively, but still manage to convey the necessary information. A frequency_penalty value of 0.5 would produce similar behavior.
+    presence_penalty: A penalty factor that discourages the model from generating responses that are similar to the input prompt. In our conversation, I'm generating responses that aren't too similar to the input prompts, but still stay on topic. A presence_penalty value of 0.5 would produce similar behavior.
+
+Note that the exact values for these parameters may need to be adjusted depending on the specifics of your use case and the desired behavior of the model.
+
+
+
+
+
+

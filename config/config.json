@@ -1,0 +1,4 @@
+{
+  "openai_api_key_path" : "/home/ryanmukai/open_ai_key.txt",
+  "conversation_sqlite_database_file" : "/home/ryanmukai/Documents/github/chatgpt_control/conversation_data/conversation.db"
+}
