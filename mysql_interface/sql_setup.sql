@@ -1,0 +1,17 @@
+-- CREATE TABLE saved_queries (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     query TEXT NOT NULL,
+--     params TEXT,
+--     columns TEXT
+-- );
+
+CREATE TABLE TIME_SERIES_DATA (
+	THE_TIMESTAMP			DATETIME,
+	VAR_1				FLOAT,
+	VAR_2				FLOAT,
+	VAR_3				FLOAT,
+
+	PRIMARY KEY(THE_TIMESTAMP)
+);
+
+
