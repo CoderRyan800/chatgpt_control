@@ -16,4 +16,4 @@ response_object = openai.ChatCompletion.create(
 )
 
 print(type(response_object))
-print(response_object)
+print(response_object['choices'][0]['message']['content'])
