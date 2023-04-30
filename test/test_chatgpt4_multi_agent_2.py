@@ -37,9 +37,16 @@ class Agent:
         self.knowledge.append(statement)
 
     def generate_response(self, message):
+        # Add a custom user instruction to guide GPT-4
         user_instruction = f"{message} If you know the answer, say 'I know the answer: '. If you need to ask another agent, say 'Agent X, please help: '. If there is not enough information to solve the problem, say 'Insufficient information.'."
 
         messages = [{"role": "system", "content": "You are a helpful assistant."}]
+
+        # Add the agent's knowledge as user messages
+        for knowledge_item in self.knowledge:
+            messages.append({"role": "user", "content": knowledge_item})
+
+        # Add the conversation history
         for sender_id, msg, _ in self.memory:
             role = "user" if sender_id != self.agent_id else "assistant"
             messages.append({"role": role, "content": msg})
@@ -47,10 +54,12 @@ class Agent:
         completion = openai.ChatCompletion.create(
             model="gpt-4",
             messages=messages,
-            user_prompt=user_instruction
+            user=user_instruction
         )
 
         return completion.choices[0].message['content']
+
+
 
 class Environment:
     def __init__(self, n_agents):
