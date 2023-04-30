@@ -3,7 +3,7 @@ from config.config import *
 openai.api_key = config_json['openai_api_key']
 
 def chat_gpt_response(prompt):
-    response = openai.ChatCompletion.create(
+    response_object = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[prompt],
         max_tokens=500,
@@ -12,13 +12,24 @@ def chat_gpt_response(prompt):
         temperature=0.1,
         best_of=3,
     )
-    return response.choices[0].text.strip()
+    return response_object['choices'][0]['message']['content']
 class ChatGPTAgent:
     def __init__(self, agent_id):
         self.agent_id = agent_id
-        self.conversations = {}
+        self.messages = [
+            {"role": "system", "content": "Your name is Agent %d, and you are distinct from any other Agent." % (agent_id,)},
+            {"role": "user", "content": "Please tell me your name."},
+            {"role": "assistant", "content": "My name is Agent %d" % (agent_id,)},
+            {"role": "user", "content": "You are to respond to any message addressed to you using your name.  You are also to respond to any message addressed to all agents.  You are not to respond to a message addressed to a different agent."}
+        ]
 
-    def send_message(self, recipient, message):
+    def send_message(self, recipient, message_string):
+
+        message = {
+            "role": "user",
+            "content": message_string
+        }
+
         if recipient not in self.conversations:
             self.conversations[recipient] = []
 
