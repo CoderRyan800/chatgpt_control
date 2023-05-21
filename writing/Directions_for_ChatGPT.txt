@@ -1,0 +1,249 @@
+Hello, ChatGPT.  I am asking you to write some code for me.  We must create a system 
+of AI agents that are powered by the chatgpt4 engine.
+
+I know a little about invokving the gpt-4 engine using the code below:
+
+import openai
+from config.config import *
+openai.api_key = config_json['openai_api_key']
+
+completion = openai.ChatCompletion.create(
+  model="gpt-4",
+  messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": "Who won the world series in 2020?"},
+        {"role": "assistant", "content": "The Los Angeles Dodgers won the World Series in 2020."},
+        {"role": "user", "content": "Where was it played?"}
+    ]
+)
+
+generated_text = completion.choices[0].message['content']
+print(generated_text)
+
+But now I will need a more sophisticated program.  Let me outline the requirements
+below.
+
+I. Agent 
+    A. Objects of class Agent are powered by "gpt-4".
+    B. Objects of class Agent are initialized with instructions.
+        1. They are given a name, such as Agent 0, Agent 1,.., Agent N-1 where 
+        N is the number of agents.
+        2. They are told to respond to messages addressed to them or to all Agents,
+        but not to resopnd to messages for a different Agent.  For example,
+        Agent 3 should respond to any message addressed to Agent 3 specifically or
+        to all agents but not respond to messages addressed to Agent 0.
+        3. Each agent must maintain a full conversation history that is presented 
+        whenever we call openai.ChatCompletion.create above.  This is because 
+        we understand that the "gpt-4" engine, as a Transformer, has no actual
+        memory.  Therefore each agent shall contain an explicit memory of all
+        messages it receives and of all of its responses.
+            a. Example of Agent memory:
+            string_answer_known = 'I know the answer'
+            string_answer_unknown = 'I do not know the answer'
+            string_unsolvable = 'I cannot solve the problem'
+            {
+                "role":"system","content":
+                "You are a problem-solving Agent.  You will be assigned a name " +
+                "and provided with directions by the user"
+            },
+            {
+            "role": "user", "content": 
+            "Your name is Agent 4. You are one of multiple system Agents. " +
+            "You must respond to any message addressed to you as Agent 4, " +
+            "and you must respond to any message addressed to all Agents. " +
+            "You must not respond to a message addressed to another agent, " +
+            "but you must remember it." +
+            "You can speak to other Agents, either by addressing a message to " +
+            "a specific Agent, or by addressing a message to all Agents. " +
+            "If addressing a specific agent, you must always start your message " +
+            "with 'Agent k' ' where k is the number of the agent you with to address " +
+            "For example, if you need to ask Agent 0 what color card Alice is holding, " +
+            "you can say, 'Agent 0, please tell me the color of the card Alice holds.' " +
+            "If you have to address all agents, then start with 'All Agents, '.  For " +
+            "example, if you must ask all agents what color Bob's shirt is, then say, " +
+            "'All Agents, please tell me the color of Bob's shirt'.  You must start " +
+            "your strings with 'Agent k' where k is an integer in the range 0 to N-1 " +
+            "where N is the number of agents or with 'All Agents'.  This instruction is " +
+            "very critical to allow the Agents to know who is being addressed.  " +
+            "If you are asked a question, and if you have enough knowledge to answer, " +
+            "always start your reply with 'I know the answer'.  If you lack enough " +
+            "knowledge to answer, always start your reply with 'I do not know the answer' " +
+            "These two strings are very important and are used by the system to determine " +
+            "when to halt.  If you are asked to solve a problem and know the answer, then " +
+            "start with 'I know the answer' and proceed to provide an answer and a " +
+            "logical explanation of why your answer is correct.  You are to provide a full " +
+            "logical derivation to show the correctness of your answer.  If you do not know, " +
+            "then in addition to saying, 'I do not know the answer', ask other Agents to help " +
+            "you by addressing a question to all agents or to a specific agent.  If after " +
+            "about ten rounds of conversation you cannot solve the problem, you may say " +
+            "'I cannot solve the problem at all.'  You must not say this unless you have " +
+            "gone through about ten rounds of conversation with otehr agents and they cannot " +
+            "provide you with enough information to solve the problem.  Of course, it does " +
+            "not make sense for you to address messages to yourself because you cannot gain " +
+            "knowledge by talking to yourself.  When you reply to Agent k, you must " +
+            "say, 'Agent k, this is Agent 4' at the start of your reply."
+            },
+            {"role": "assistant", "content": 
+            "My name is Agent 4.  I will remember any messages that I hear. " +
+            "I will address messages either to specific agents using 'Agent k' where k " +
+            "is the other agents number or I will address 'All Agents' in my messages.  " +
+            "I will only respond to those messages addressed to me, Agent 4, but not to " +
+            "messages addressed to others.  If I know the answer to a problem, I will " +
+            "use the stirng 'I know the answer' to start my response.  If I do not know the " +
+            "answer to a problem, I will use the string 'I do not know the answer' to start " +
+            "my response and will speak to other Agents to get information to solve the " +
+            "problem.  If after about 10 iterations of the conversation the problem " +
+            "cannot be solved, I will give up and start my response with " +
+            "'I cannot solve the problem' but I will not give up without conversing with " +
+            "other agents to attempt to solve the problem first.  When I speak to" +
+            "another Agent, I will start with 'Agent k, this is Agent 4'."
+            },
+            {"role":"user", "content":
+            "Agent 4, if A is true then B is also true.  " +
+            "What is the truth value of C?"
+            },
+            {
+                "role":"assistant","content":
+                "I do not know the answer.  All Agents, I have been asked the truth " +
+                "value of C, but I only know that A implies B.  Does someone have more " +
+                "information? "
+            },
+            {
+                "role":"user","content":
+                "Agent 4, this is Agent 0.  I do not know the answer.  " +
+                "I only know that B is False."
+            },
+            {
+                "role":"user","content":
+                "Agent 4, this is Agent 3.  I do not know the answer.  " +
+                "I know that either A or C must be " +
+                "True but not both, so A exclusive-or C."
+            },
+            {
+                "role":"assistant","content":
+                "I know the answer.  Since B is False and since A implies B, " +
+                "it must be that A is also False since if A were True then B " +
+                "would have to be True as well.  Now since A is False and since " +
+                "A exclusive-or C, then it must be that C is true."
+            }
+    D. We see from the instructions and from the above example that an agent 
+    gets all its incoming instructions and message from role "user", so the 
+    environment has to pass all instructions and messages as "user" to the Agent.
+    Then the Agent has the role "assistant".
+        1. Agents must maintain a complete memory that is presented again each 
+        time to the "gpt-4" engine given that the engine lacks a memory in and 
+        of itself being a Transformer neural network.
+        2. Messages into the agent come as "user".
+        3. Messages from the agent came as "assistant".
+        4. Agent is to follow the sample instructions we gave above in the 
+        sample memory and to use the logical example we gave above 
+        so it understands its assignment.
+        C. If an Agent fails to use one of these strings:
+        1. "I know the answer"
+        2. "I do not know the answer"
+        3. "I cannot solve the problem"
+        Then the environment must send a reminder to the Agent that its reply must 
+        contain one of the strings above.
+    E. If an Agent i fails to address Agent j using "Agent j, this is Agent i" then 
+    the environment must remind the Agent to do so.  The Agent is also allowed 
+    to say, "All Agents, this is Agent i".  If the agent doesn't use one of these 
+    two methods, the environment must remind the agent to do so.
+    F. II-C and II-D above can be enforced by checking the Agent's reply and 
+    commanding the agent to try again. 
+        1. For example:
+            {"role":"user","content",
+            "Agent 4, please remember your reply has to contain 'I know the answer',"+
+            "'I do not know the answer', or 'I cannot solve the problem'."}
+        2. For example:
+            {"role":"user","content",
+            "Agent 4, please remember that you must say 'All Agents, this is Agent 4' " +
+            "or 'Agent k, this is Agent 4' where k is the Agent you wish to speak to."}
+    G. Agent contains two flags that are initially False.
+        1. flag_problem_solved 
+        2. flag_problem_failed 
+    H. If Agent cannot solve the problem then flag_problem_failed = True and 
+    leave flag_problem_solved as False.
+    There are two conditions that can cause this.
+        1. Agent says, "I cannot solve the problem".
+        2. Length of memory > n_initial_message + 5 * number of agents.
+    I. If Agent says, "I know the answer", then set flag_problem_solved = True
+    and flag_problem_failed=False.
+
+II. Environment
+    A. The environment must facility the passing of messages among the Agents.
+    B. The environment must initialize each Agent k with appropriate instrunctions.
+    For example, we initialized Agent 4 with instructions above, and each agent must 
+    be assigned its proper name from Agent 0 through Agent N-1, where there are N 
+    Agents in the system.  We supply N when we create the environment.
+    B. When an Agent says, "I cannot solve the problem", the environment should 
+    set a flag for problem unsolvable and halt further conversation.
+    C. Initially, flag_problem_failed_to_solve and flag_problem_solved are both False.
+    
+    D. The environment continues to facilitate Agent message passing until one of the 
+    following events happens:
+        1. There are 5 * N total messages and no Agent says, "I know the answer".
+        In this case, halt and set flag_problem_failed_to_solve = True.
+        2. An Agent says, "I cannot solve the problem."  In this case, halt 
+        and set flag_problem_failed_to_solve = True.
+        3. An Agent says, "I know the answer" in which case set 
+        flag_problem_solved = True, and the Agent's reply containing
+        that string is printed to stdout.
+    
+    E. Every Agent message must be printed to stdout while the conversation is 
+    ongoing in order to allow debugging of the system and in order to allow 
+    conversations to be recorded.
+    
+    F. The conversation record and the memory of each agent must be dumped 
+    when either flag is set to true.  These are to be written to a disk file
+    using a provided filename.  It will be a JSON.  Here is the JSON format
+    at a high level:
+        A. For each Agent k, there is a key "Agent_k" whose value 
+        is a list corresponding to the Agent memory.  For Agent 4, we could 
+        have the memory state in the format described above, for example.
+        In this way, it becoems possible to re-create each Agent's memory 
+        state from the list value for "Agent_k" and to pass that into 
+        openai.ChatCompletion.create(messages=<memory_state>).
+        B. And the record of messages sent and received by all Agents 
+        is stored under key "Agent_messages" as a list of strings.  This
+        allows a reviewer to read the conversational history.
+III. Test code 
+    A. We must also create unit tests for the Agents and the environment.
+    At an absolute minimum.
+    B. Minimum unit tests for the Agent.
+        1. Verify ability to maintian full conversational memory and pass to the 
+        messages parameter of openai.ChatCompletion.create.  
+        2. Verify incoming messages from any source, including other agents,
+        are passed from role "user"
+        3. Verify created messages from the itself agent are 
+        saved under role "assistant".
+        2. Verify the Agent internal code will remind the agent to always 
+        address All Agents using "All Agents, this is Agent k" or 
+        address Agent j using "Agent j, this is Agent k" if this is not
+        found at the start of an Agent's reply.
+        3. Verify the Agent internal code will check each reply for 
+            1. 'I know the answer'
+            2. 'I do not know the answer'
+            3. 'I cannot solve the problem'
+        and remind the Agent to include one of the three responses as 
+        part of the reply string.
+        4. Verify that if the length of the Agent's memory after the initial 
+        list of instructions exceeds 5*N where N is number of Agents, then 
+        the Agent will set a flag to indicate it cannot solve the problem.
+            1. Verify the Agent computes length of initialization instructions 
+            and saves as n_initial_messages.
+            2. Verify the Agent when given number of total agents N will 
+            save as n_agents.  This is done by calling the agent's initializer 
+            with the number of total agents and also with the agents own 
+            number k.
+            3. Verify when total messages hits 
+            n_initial_message + 5*n_agents the agent sets the 
+            flag_problem_failed to True.
+            4. Verify flag_problem_failed is initially False.
+        5. Verify that if agent reply contains "I know the answer" then set 
+        Agent's flag_problem_solved = True.  Verify that flag_problem_solved 
+        is initially False.
+        6. Verify that if more than one of the strings 
+        "I know the answer", "I don't know the answer", or "I cannot solve the problem" 
+        appears in a message from the Agent, the Agent's internal code will 
+        remind the agent to use exactly and precisely one of the three strings 
+        in its answer.
