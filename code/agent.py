@@ -11,14 +11,12 @@ class Agent:
         self.flag_problem_failed = False
         self.n_initial_messages = 0
         self.memory = [
-            {"role":"system","content": f"You are a problem-solving Agent named Agent {self.id}."},
-            {"role": "user", "content": 
-                f"Your name is Agent {self.id}. You are one of {num_agents} system Agents. " +
-                "You must respond to any message addressed to you as Agent {self.id}, " +
-                "and you must respond to any message addressed to all Agents. " +
-                "You must not respond to a message addressed to another agent, " +
-                "but you must remember it." 
-            }
+            {"role": "system", "content": "You are a problem-solving Agent."},
+            {"role": "user", "content": f"Your name is Agent {agent_id}. You are one of {num_agents} system Agents. " +
+                                        "You must respond to any message addressed to you as Agent {agent_id}, " +
+                                        "and you must respond to any message addressed to all Agents. " +
+                                        "You must not respond to a message addressed to another agent, " +
+                                        "but you must remember it."}
         ]
 
     def add_message(self, role, content):
@@ -36,8 +34,17 @@ class Agent:
 
         if "I know the answer" in message:
             self.flag_problem_solved = True
-        elif "I do not know the answer" in message or len(self.memory) > self.n_initial_messages + 5 * self.num_agents:
+            self.flag_problem_failed = False
+        elif "I do not know the answer" in message:
+            self.flag_problem_solved = False
+            self.flag_problem_failed = False
+        elif "I cannot solve the problem" in message:
+            self.flag_problem_solved = False
             self.flag_problem_failed = True
+        elif len(self.memory) > self.n_initial_messages + 5 * self.num_agents:
+            self.flag_problem_solved = False
+            self.flag_problem_failed = True
+
         return message
 
     def get_flag_problem_solved(self):

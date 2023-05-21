@@ -14,7 +14,7 @@ def test_agent_initialization():
     assert agent.flag_problem_failed == False
     assert agent.n_initial_messages == 2
     assert agent.memory == [
-        {"role":"system","content": "You are a problem-solving Agent named Agent 1."},
+        {"role": "system", "content": "You are a problem-solving Agent."},
         {"role": "user", "content": 
             "Your name is Agent 1. You are one of 5 system Agents. " +
             "You must respond to any message addressed to you as Agent 1, " +
@@ -59,7 +59,7 @@ def test_problem_failed():
     assert agent.flag_problem_failed == True
 
     agent = Agent(1, 5)
-    agent.n_initial_messages = 0
+    agent.n_initial_messages = 2  # Set it back to the correct value
 
     openai.ChatCompletion.create.return_value = mock.Mock(choices=[mock.Mock(message={"content": "Test response"})])
     for _ in range(5 * agent.num_agents + 1):
