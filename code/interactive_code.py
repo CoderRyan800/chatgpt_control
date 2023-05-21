@@ -1,17 +1,19 @@
+import json
 from agent import Agent
 
 def save_memory_and_exit(agent):
     # Save agent's memory to a file
     with open("agent_memory.txt", "w") as file:
-        for message in agent.get_memory():
-            file.write(f"{message['role']}: {message['content']}\n")
+        file.write(json.dumps(agent.get_memory(),indent=4))
+        #for message in agent.get_memory():
+        #    file.write(f"{message['role']}: {message['content']}\n")
     print("Agent memory saved. Exiting...")
 
 def main():
     num_agents = 5  # Specify the number of agents
     agent_id = 0  # Specify the ID of the current agent
 
-    agent = Agent(agent_id, num_agents)
+    agent = Agent(agent_id, num_agents, 'agent_memory.txt')
 
     print("Welcome to the Agent Chat!")
     print("Instructions:")
