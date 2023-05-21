@@ -1,6 +1,7 @@
 import openai
 import json
 from config.config import *
+from agent_instructions import *
 
 openai.api_key = config_json['openai_api_key']
 
@@ -12,14 +13,7 @@ class Agent:
         self.flag_problem_failed = False
         self.n_initial_messages = 0
         if agent_memory_file is None:
-            self.memory = [
-                {"role": "system", "content": "You are a problem-solving Agent."},
-                {"role": "user", "content": f"Your name is Agent {agent_id}. You are one of {num_agents} system Agents. " +
-                                            "You must respond to any message addressed to you as Agent {agent_id}, " +
-                                            "and you must respond to any message addressed to all Agents. " +
-                                            "You must not respond to a message addressed to another agent, " +
-                                            "but you must remember it."}
-            ]
+            self.memory = generate_agent_instructions(agent_id=agent_id)
         else:
             with open(agent_memory_file,'r') as file:
                 self.memory = json.load(file)

@@ -13,7 +13,7 @@ def main():
     num_agents = 5  # Specify the number of agents
     agent_id = 0  # Specify the ID of the current agent
 
-    agent = Agent(agent_id, num_agents, 'agent_memory.txt')
+    agent = Agent(agent_id, num_agents)
 
     print("Welcome to the Agent Chat!")
     print("Instructions:")
