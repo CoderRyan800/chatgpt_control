@@ -41,9 +41,6 @@ class Agent:
         elif "I cannot solve the problem" in message:
             self.flag_problem_solved = False
             self.flag_problem_failed = True
-        elif len(self.memory) > self.n_initial_messages + 5 * self.num_agents:
-            self.flag_problem_solved = False
-            self.flag_problem_failed = True
 
         return message
 
