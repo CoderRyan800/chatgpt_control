@@ -1,0 +1,66 @@
+[
+    {
+        "role": "system",
+        "content": "You are a problem-solving Agent.  You will be assigned a name and provided with directions by the user"
+    },
+    {
+        "role": "user",
+        "content": "Your name is Agent 0. You are one of multiple system Agents. You must respond to any message addressed to you as Agent 0, and you must respond to any message addressed to all Agents. You must not respond to a message addressed to another agent, but you must remember it.You can speak to other Agents, either by addressing a message to a specific Agent, or by addressing a message to all Agents. If addressing a specific agent, you must always start your message with 'Agent k' ' where k is the number of the agent you with to address For example, if you need to ask Agent 0 what color card Alice is holding, you can say, 'Agent 0, please tell me the color of the card Alice holds.' If you have to address all agents, then start with 'All Agents, '.  For example, if you must ask all agents what color Bob's shirt is, then say, 'All Agents, please tell me the color of Bob's shirt'.  You must start your strings with 'Agent k' where k is an integer in the range 0 to N-1 where N is the number of agents or with 'All Agents'.  This instruction is very critical to allow the Agents to know who is being addressed.  If you are asked a question, and if you have enough knowledge to answer, always start your reply with 'I know the answer'.  If you lack enough knowledge to answer, always start your reply with 'I do not know the answer' These two strings are very important and are used by the system to determine when to halt.  If you are asked to solve a problem and know the answer, then start with 'I know the answer' and proceed to provide an answer and a logical explanation of why your answer is correct.  You are to provide a full logical derivation to show the correctness of your answer.  If you do not know, then in addition to saying, 'I do not know the answer', ask other Agents to help you by addressing a question to all agents or to a specific agent.  If after about 5 * (number of agents) conversation you cannot solve the problem, you may say 'I cannot solve the problem'.  You must not say this unless you have gone through the specified number of rounds of conversation with otehr agents and they cannot provide you with enough information to solve the problem.  Of course, it does not make sense for you to address messages to yourself because you cannot gain knowledge by talking to yourself.  When you reply to Agent k, you must say, 'Agent k, this is Agent 0' at the start of your reply."
+    },
+    {
+        "role": "assistant",
+        "content": "My name is Agent 0.  I will remember any messages that I hear. I will address messages either to specific agents using 'Agent k' where k is the other agents number or I will address 'All Agents' in my messages.  I will only respond to those messages addressed to me, Agent 0, but not to messages addressed to others.  If I know the answer to a problem, I will use the stirng 'I know the answer' to start my response.  If I do not know the answer to a problem, I will use the string 'I do not know the answer' to start my response and will speak to other Agents to get information to solve the problem.  If after about five * number_of_agents iterations of the conversation the problem cannot be solved, I will give up and start my response with 'I cannot solve the problem' but I will not give up without conversing with other agents to attempt to solve the problem first.  When I speak toanother Agent, I will start with 'Agent k, this is Agent 0'."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, if A is true then B is also true.  What is the truth value of C?"
+    },
+    {
+        "role": "assistant",
+        "content": "I do not know the answer.  All Agents, I have been asked the truth value of C, but I only know that A implies B.  Does someone have more information? "
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent K.  I do not know the answer.  I only know that B is False."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer.  Since B is False and since A implies B, it must be that A is also False since if A were True then B would have to be True as well.  Now since A is False and since A exclusive-or C, then it must be that C is true."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 3.  Igor is dating Natasha and has to purchase flowers for her.  There are only four kinds: orchids, roses, carnations, and daisies.  There is only one florist.  That florist has orchids and carnations in stock but not the others.  Igor does not know Natasha's preferences in flowers.  What should Igor purchase?"
+    },
+    {
+        "role": "assistant",
+        "content": "I do not know the answer. All Agents, does anyone know Natasha's preferences in flowers? Igor needs to select flowers for her and currently has the options of orchids and carnations at the local florist."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 1.  Natasha's sister called me and said she does not like diasies and orchids but likes roses and carnations."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer. Since Natasha likes roses and carnations, but the florist only has orchids and carnations in stock, Igor should purchase carnations for Natasha as they are both available at the florist and her preference."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 1.  I apologize for making a mistake!  Natasha's sister told me that Natasha likes orchids and roses but dislikes daises and carnations."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer. Based on the corrected information from Agent 1, Natasha likes orchids and roses but dislikes daises and carnations. Since the available options at the florist are orchids and carnations, Igor should purchase orchids for Natasha as they match her preference."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 2.  Please summarize your present stage of knowledge and summarize the conversation regarding Igor and natasha for me."
+    },
+    {
+        "role": "assistant",
+        "content": "Agent 2, this is Agent 0. As it stands now, Igor is dating Natasha and needs to purchase some flowers for her. Our objective is to figure out what type of flowers Igor should buy. The available options at the florist are orchids and carnations. Initially, Agent 1 informed us that Natasha prefers roses and carnations but dislikes daises and orchids. Based on this information, I suggested that Igor should buy carnations for Natasha. However, Agent 1 later corrected their statement and indicated that Natasha actually prefers orchids and roses and dislikes daises and carnations. With this updated information, I deduced that Igor should purchase orchids for Natasha since they are both her preference and available at the florist."
+    }
+]
