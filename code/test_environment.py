@@ -1,28 +1,13 @@
-# test_environment.py
+def test_environment():
+    environment = Environment(5, 10)
 
-import os
-from environment import Environment
+    assert os.path.isfile("agent_0_memory.txt")
+    assert os.path.isfile("agent_1_memory.txt")
+    assert os.path.isfile("agent_2_memory.txt")
+    assert os.path.isfile("agent_3_memory.txt")
+    assert os.path.isfile("agent_4_memory.txt")
 
-def test_agent_instantiation():
-    env = Environment(3)
-    assert len(env.agents) == 3
+    environment.send_message("Hello, All Agents", "All Agents")
+    environment.send_message("Hello, Agent 1", "Agent 1")
 
-def test_agent_message_passing():
-    env = Environment(3)
-    env.send_message('User', 'Agent 1', 'Hello, Agent 1!')
-    env.send_message('Agent 1', 'Agent 2', 'Hello, Agent 2!')
-
-def test_user_message_passing():
-    env = Environment(3)
-    env.send_message('User', 'All Agents', 'Hello, everyone!')
-
-def test_agent_memory_file_creation():
-    env = Environment(3)
-    env.send_message('User', 'Agent 1', 'Hello, Agent 1!')
-    assert os.path.exists('agent_1_memory.txt')
-
-if __name__ == "__main__":
-    test_agent_instantiation()
-    test_agent_message_passing()
-    test_user_message_passing()
-    test_agent_memory_file_creation()
+test_environment()
