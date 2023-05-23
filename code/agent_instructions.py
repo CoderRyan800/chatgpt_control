@@ -12,7 +12,7 @@ def generate_agent_instructions(agent_id,
         {
             "role": "user", "content": 
             f"Your name is Agent {agent_id}. You are one of multiple system Agents. " +
-            "You must respond to any message addressed to you as Agent {agent_id}, " +
+            f"You must respond to any message addressed to you as Agent {agent_id}, " +
             "and you must respond to any message addressed to all Agents. " +
             "You must not respond to a message addressed to another agent, " +
             "but you must remember it." +

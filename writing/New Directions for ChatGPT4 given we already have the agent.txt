@@ -1,0 +1,258 @@
+Hello ChatGPT4.  I will ask you to extend some code that you wrote for me in another session. 
+ I know you don't have memory so I'll re-introduce the problem.  
+ We must implement Agents, and we must implement an environment in which N agents operate and interact. 
+  The agents can pass messages to each other and can also pass messages in a broadcast to all agents.  T
+  he environment must initialize the agents from 0 through N-1 and then facilitate message passing. 
+   It must also print all messages among agents to stdout.  
+   It must also save each agent's memory to a separate text file for each agent.
+
+Here is the agent.py code.  Please have the environment work with this specific code as is because 
+I have no desire to chagne agent.py at all.
+
+<begin agent.py>
+import openai
+import json
+from config.config import *
+from agent_instructions import *
+
+openai.api_key = config_json['openai_api_key']
+
+class Agent:
+    def __init__(self, agent_id, num_agents, agent_memory_file=None):
+        self.id = agent_id
+        self.num_agents = num_agents
+        self.flag_problem_solved = False
+        self.flag_problem_failed = False
+        self.n_initial_messages = 0
+        if agent_memory_file is None:
+            self.memory = generate_agent_instructions(agent_id=agent_id)
+        else:
+            with open(agent_memory_file,'r') as file:
+                self.memory = json.load(file)
+
+    def add_message(self, role, content):
+        self.memory.append({"role": role, "content": content})
+
+    def respond(self, content):
+        self.add_message("user", content)
+
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=self.memory
+        )
+
+        message = response.choices[0].message['content']
+
+        # Add the agent's response to the memory
+        self.add_message("assistant", message)
+
+        if "I know the answer" in message:
+            self.flag_problem_solved = True
+            self.flag_problem_failed = False
+        elif "I do not know the answer" in message:
+            self.flag_problem_solved = False
+            self.flag_problem_failed = False
+        elif "I cannot solve the problem" in message:
+            self.flag_problem_solved = False
+            self.flag_problem_failed = True
+
+        return message
+
+    def get_flag_problem_solved(self):
+        return self.flag_problem_solved
+
+    def get_flag_problem_failed(self):
+        return self.flag_problem_failed
+
+    def get_memory(self):
+        return self.memory
+
+
+<end agent.py>
+
+And here is a sample session run interactively where a human plays the roles of other agents but 
+the code in agent.py plays Agent 0.  This is the memory dump of Agent 0.
+
+[
+    {
+        "role": "system",
+        "content": "You are a problem-solving Agent.  You will be assigned a name and provided with directions by the user"
+    },
+    {
+        "role": "user",
+        "content": "Your name is Agent 0. You are one of multiple system Agents. You must respond to any message addressed to you as Agent 0, and you must respond to any message addressed to all Agents. You must not respond to a message addressed to another agent, but you must remember it.You can speak to other Agents, either by addressing a message to a specific Agent, or by addressing a message to all Agents. If addressing a specific agent, you must always start your message with 'Agent k' ' where k is the number of the agent you with to address For example, if you need to ask Agent 0 what color card Alice is holding, you can say, 'Agent 0, please tell me the color of the card Alice holds.' If you have to address all agents, then start with 'All Agents, '.  For example, if you must ask all agents what color Bob's shirt is, then say, 'All Agents, please tell me the color of Bob's shirt'.  You must start your strings with 'Agent k' where k is an integer in the range 0 to N-1 where N is the number of agents or with 'All Agents'.  This instruction is very critical to allow the Agents to know who is being addressed.  If you are asked a question, and if you have enough knowledge to answer, always start your reply with 'I know the answer'.  If you lack enough knowledge to answer, always start your reply with 'I do not know the answer' These two strings are very important and are used by the system to determine when to halt.  If you are asked to solve a problem and know the answer, then start with 'I know the answer' and proceed to provide an answer and a logical explanation of why your answer is correct.  You are to provide a full logical derivation to show the correctness of your answer.  If you do not know, then in addition to saying, 'I do not know the answer', ask other Agents to help you by addressing a question to all agents or to a specific agent.  If after about 5 * (number of agents) conversation you cannot solve the problem, you may say 'I cannot solve the problem'.  You must not say this unless you have gone through the specified number of rounds of conversation with otehr agents and they cannot provide you with enough information to solve the problem.  Of course, it does not make sense for you to address messages to yourself because you cannot gain knowledge by talking to yourself.  When you reply to Agent k, you must say, 'Agent k, this is Agent 0' at the start of your reply."
+    },
+    {
+        "role": "assistant",
+        "content": "My name is Agent 0.  I will remember any messages that I hear. I will address messages either to specific agents using 'Agent k' where k is the other agents number or I will address 'All Agents' in my messages.  I will only respond to those messages addressed to me, Agent 0, but not to messages addressed to others.  If I know the answer to a problem, I will use the stirng 'I know the answer' to start my response.  If I do not know the answer to a problem, I will use the string 'I do not know the answer' to start my response and will speak to other Agents to get information to solve the problem.  If after about five * number_of_agents iterations of the conversation the problem cannot be solved, I will give up and start my response with 'I cannot solve the problem' but I will not give up without conversing with other agents to attempt to solve the problem first.  When I speak toanother Agent, I will start with 'Agent k, this is Agent 0'."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, if A is true then B is also true.  What is the truth value of C?"
+    },
+    {
+        "role": "assistant",
+        "content": "I do not know the answer.  All Agents, I have been asked the truth value of C, but I only know that A implies B.  Does someone have more information? "
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent K.  I do not know the answer.  I only know that B is False."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer.  Since B is False and since A implies B, it must be that A is also False since if A were True then B would have to be True as well.  Now since A is False and since A exclusive-or C, then it must be that C is true."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 3.  Igor is dating Natasha and has to purchase flowers for her.  There are only four kinds: orchids, roses, carnations, and daisies.  There is only one florist.  That florist has orchids and carnations in stock but not the others.  Igor does not know Natasha's preferences in flowers.  What should Igor purchase?"
+    },
+    {
+        "role": "assistant",
+        "content": "I do not know the answer. All Agents, does anyone know Natasha's preferences in flowers? Igor needs to select flowers for her and currently has the options of orchids and carnations at the local florist."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 1.  Natasha's sister called me and said she does not like diasies and orchids but likes roses and carnations."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer. Since Natasha likes roses and carnations, but the florist only has orchids and carnations in stock, Igor should purchase carnations for Natasha as they are both available at the florist and her preference."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 1.  I apologize for making a mistake!  Natasha's sister told me that Natasha likes orchids and roses but dislikes daises and carnations."
+    },
+    {
+        "role": "assistant",
+        "content": "I know the answer. Based on the corrected information from Agent 1, Natasha likes orchids and roses but dislikes daises and carnations. Since the available options at the florist are orchids and carnations, Igor should purchase orchids for Natasha as they match her preference."
+    },
+    {
+        "role": "user",
+        "content": "Agent 0, this is Agent 2.  Please summarize your present stage of knowledge and summarize the conversation regarding Igor and natasha for me."
+    },
+    {
+        "role": "assistant",
+        "content": "Agent 2, this is Agent 0. As it stands now, Igor is dating Natasha and needs to purchase some flowers for her. Our objective is to figure out what type of flowers Igor should buy. The available options at the florist are orchids and carnations. Initially, Agent 1 informed us that Natasha prefers roses and carnations but dislikes daises and orchids. Based on this information, I suggested that Igor should buy carnations for Natasha. However, Agent 1 later corrected their statement and indicated that Natasha actually prefers orchids and roses and dislikes daises and carnations. With this updated information, I deduced that Igor should purchase orchids for Natasha since they are both her preference and available at the florist."
+    }
+]
+
+Please create:
+
+1. An environment based on the specifications above.
+    a. Agents must be able to message each other individually or in broadcast to all agents.
+    b. Methods to be provided to allow a human user to interactively send messages to a 
+    selected agent or to all agents.
+    c. All messages must be printed with sender and recipient.
+    d. Must use existing agent.py methods for message passing.
+2. Test cases to test agent instantiation and agent message passing and also to test 
+code for human to address agents individually or broadcast to all.
+3. An interactive script to create an environment with three agents and to allow a human 
+to interact with them.
+    a. If human addresses Agent k, send message only to agent k.
+    b. If human says "All AGents", then broadcast to all agents.
+
+
+Based on your requirements, I will create three files: environment.py, test_environment.py, and interactive_script.py. 
+
+The first file, environment.py, contains the Environment class which is responsible for managing agents and messages.
+
+```python
+# environment.py
+
+import json
+from agent import Agent
+
+class Environment:
+    def __init__(self, num_agents):
+        self.agents = [Agent(i, num_agents) for i in range(num_agents)]
+
+    def send_message(self, sender, recipient, message):
+        if recipient == 'All Agents':
+            for agent in self.agents:
+                agent.add_message('user', message)
+                response = agent.respond(message)
+                self._print_message(sender, f'Agent {agent.id}', response)
+                self._save_agent_memory(agent)
+        else:
+            recipient_id = int(recipient.split(' ')[1])
+            self.agents[recipient_id].add_message('user', message)
+            response = self.agents[recipient_id].respond(message)
+            self._print_message(sender, recipient, response)
+            self._save_agent_memory(self.agents[recipient_id])
+
+    def _print_message(self, sender, recipient, message):
+        print(f'{sender} to {recipient}: {message}')
+
+    def _save_agent_memory(self, agent):
+        with open(f'agent_{agent.id}_memory.txt', 'w') as file:
+            json.dump(agent.get_memory(), file)
+```
+
+The second file, test_environment.py, contains test cases for the Environment class.
+
+```python
+# test_environment.py
+
+import os
+from environment import Environment
+
+def test_agent_instantiation():
+    env = Environment(3)
+    assert len(env.agents) == 3
+
+def test_agent_message_passing():
+    env = Environment(3)
+    env.send_message('User', 'Agent 1', 'Hello, Agent 1!')
+    env.send_message('Agent 1', 'Agent 2', 'Hello, Agent 2!')
+
+def test_user_message_passing():
+    env = Environment(3)
+    env.send_message('User', 'All Agents', 'Hello, everyone!')
+
+def test_agent_memory_file_creation():
+    env = Environment(3)
+    env.send_message('User', 'Agent 1', 'Hello, Agent 1!')
+    assert os.path.exists('agent_1_memory.txt')
+
+if __name__ == "__main__":
+    test_agent_instantiation()
+    test_agent_message_passing()
+    test_user_message_passing()
+    test_agent_memory_file_creation()
+```
+
+The third file, interactive_script.py, is an interactive script for a human to interact with agents.
+
+```python
+# interactive_script.py
+
+from environment import Environment
+
+def main():
+    env = Environment(3)
+
+    while True:
+        user_input = input("Enter your message: ")
+        if user_input.lower() == 'exit':
+            break
+
+        recipient = input("Enter the recipient ('Agent n' or 'All Agents'): ")
+
+        env.send_message('User', recipient, user_input)
+
+if __name__ == "__main__":
+    main()
+```
+
+Please replace the placeholders in the agent.py code (`generate_agent_instructions`, `config.config`, `config_json['openai_api_key']`, and `agent_instructions`) with the actual values or functions. 
+
+The interactive_script.py can be run directly in the terminal, and you can interact with the agents by following the prompts. You can exit the interaction by typing 'exit' when asked for a message.
+
+For running the tests, simply run the test_environment.py script.
+
+Please let me know if there are any additional requirements or modifications that you would like.
+
