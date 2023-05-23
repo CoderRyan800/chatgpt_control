@@ -1,45 +1,49 @@
 import os
-import json
 from agent import Agent
-import re
 
 class Environment:
-    def __init__(self, num_agents, recursive_depth_limit=10):
+    def __init__(self, num_agents, max_recursion_depth):
         self.agents = []
-        self.recursive_depth_limit = recursive_depth_limit
-        for agent_id in range(num_agents):
-            agent_memory_file = f'agent_{agent_id}_memory.txt'
-            if os.path.isfile(agent_memory_file):
-                self.agents.append(Agent(agent_id, num_agents, agent_memory_file))
+        self.max_recursion_depth = max_recursion_depth
+        for i in range(num_agents):
+            memory_file = f"agent_{i}_memory.txt"
+            if os.path.isfile(memory_file):
+                self.agents.append(Agent(i, num_agents, memory_file))
             else:
-                self.agents.append(Agent(agent_id, num_agents))
+                self.agents.append(Agent(i, num_agents))
 
-    def _save_agent_memory(self, agent_id):
-        agent = self.agents[agent_id]
-        with open(f'agent_{agent_id}_memory.txt', 'w') as file:
-            json.dump(agent.get_memory(), file)
+    def all_agents_solved(self):
+        for agent in self.agents:
+            if agent.get_flag_problem_solved():
+                return True
+        return False
 
-    def send_message(self, message, recipient, recursive_depth=0):
-        if recursive_depth >= self.recursive_depth_limit:
-            print("Recursive depth limit reached, message not sent.")
+    def send_message(self, sender, recipient, content, recursion_depth=0):
+        print(f"send_message({sender},{recipient},{content},{recursion_depth}")
+        if self.all_agents_solved() or recursion_depth >= self.max_recursion_depth:
+            for agent in self.agents:
+                with open(f"agent_{agent.id}_memory.txt", 'w') as file:
+                    json.dump(agent.get_memory(), file)
             return
 
         if recipient == "All Agents":
             for agent in self.agents:
-                agent.add_message("user", message)
-                response = agent.respond(message)
-                self._save_agent_memory(agent.id)
-                print(f'Agent {agent.id} responded: {response}')
-                recipient_response = re.findall(r"^(All Agents|Agent \d+)", response)
-                if recipient_response:
-                    self.send_message(response, recipient_response[0], recursive_depth + 1)
+                response = agent.respond(content)
+                self.send_message(f"Agent {agent.id}", self.parse_recipient(response), response, recursion_depth + 1)
         else:
-            agent_id = int(recipient.split(' ')[1])  # Get agent ID from recipient string 'Agent {id}'
-            agent = self.agents[agent_id]
-            agent.add_message("user", message)
-            response = agent.respond(message)
-            self._save_agent_memory(agent.id)
-            print(f'Agent {agent_id} responded: {response}')
-            recipient_response = re.findall(r"^(All Agents|Agent \d+)", response)
-            if recipient_response:
-                self.send_message(response, recipient_response[0], recursive_depth + 1)
+            recipient_id = int(recipient.split(" ")[1])
+            response = self.agents[recipient_id].respond(content)
+            self.send_message(f"Agent {recipient_id}", self.parse_recipient(response), response, recursion_depth + 1)
+
+    def parse_recipient(self, message):
+        if "All Agents" in message:
+            return "All Agents"
+        else:
+            words = message.split(" ")
+            for i, word in enumerate(words):
+                if word == "Agent":
+                    recipient = "Agent " + words[i + 1]
+                    if recipient[-1] == ",":
+                        recipient = recipient[:-1]
+                    return recipient
+        return ""
