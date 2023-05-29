@@ -1,5 +1,6 @@
 import os
 import json
+import time
 from agent import Agent
 
 class Environment:
@@ -33,6 +34,7 @@ class Environment:
                 if f"Agent {agent.id}" != sender:
                     response = agent.respond(content)
                     agent_response_list.append([agent,response])
+                time.sleep(80)
             for agent_response in agent_response_list:
                 agent = agent_response[0]
                 response = agent_response[1]
