@@ -1,4 +1,5 @@
 import os
+import json
 from agent import Agent
 
 class Environment:
@@ -22,18 +23,25 @@ class Environment:
         print(f"send_message({sender},{recipient},{content},{recursion_depth}")
         if self.all_agents_solved() or recursion_depth >= self.max_recursion_depth:
             for agent in self.agents:
-                with open(f"agent_{agent.id}_memory.txt", 'w') as file:
+                with open(f"agent_{agent.id}_final_memory.txt", 'w') as file:
                     json.dump(agent.get_memory(), file)
             return
 
         if recipient == "All Agents":
+            agent_response_list = []
             for agent in self.agents:
-                response = agent.respond(content)
+                if f"Agent {agent.id}" != sender:
+                    response = agent.respond(content)
+                    agent_response_list.append([agent,response])
+            for agent_response in agent_response_list:
+                agent = agent_response[0]
+                response = agent_response[1]
                 self.send_message(f"Agent {agent.id}", self.parse_recipient(response), response, recursion_depth + 1)
         else:
             recipient_id = int(recipient.split(" ")[1])
-            response = self.agents[recipient_id].respond(content)
-            self.send_message(f"Agent {recipient_id}", self.parse_recipient(response), response, recursion_depth + 1)
+            if f"Agent {recipient_id}" != sender:
+                response = self.agents[recipient_id].respond(content)
+                self.send_message(f"Agent {recipient_id}", self.parse_recipient(response), response, recursion_depth + 1)
 
     def parse_recipient(self, message):
         if "All Agents" in message:
