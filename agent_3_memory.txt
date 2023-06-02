@@ -13,7 +13,7 @@
     },
     {
         "role": "user",
-        "content": "Agent 1, if A is true then B is also true.  What is the truth value of C?"
+        "content": "Agent 3, if A is true then B is also true.  What is the truth value of C?"
     },
     {
         "role": "assistant",
@@ -21,11 +21,11 @@
     },
     {
         "role": "user",
-        "content": "Agent 1, this is Agent K.  I do not know the answer.  I only know that B is False."
+        "content": "Agent 3, this is Agent K.  I do not know the answer.  I only know that B is False."
     },
     {
         "role": "user",
-        "content": "Agent 1, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
+        "content": "Agent 3, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
     },
     {
         "role": "assistant",
@@ -33,6 +33,6 @@
     },
     {
         "role": "user",
-        "content": "Igor is dating Natasha and must purchase flowers for her.  There are three kinds of flowers in this problem which are orchids, roses, and carnations.  There is only one available florist. You do not know Natasha's flower likes and dislikes, nor do you know what flowers the florist has in stock. Igor can purchase only one kind of flower.  You only claim to know the answer if you know the one specific flower type for Igor to purchase.  What should Igor purchase?"
+        "content": "Igor is dating Natasha and must purchase flowers for her.  There are three kinds of flowers in this problem which are orchids, roses, and carnations.  There is only one available florist, and the florist only has orchids and carnations.  You do not know Natasha's flower likes and dislikes.Igor can purchase only one kind of flower. You only claim to know the answer if you know the one specific flower type for Igor to purchase.   What should Igor purchase?"
     }
 ]

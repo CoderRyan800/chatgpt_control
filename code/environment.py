@@ -21,8 +21,8 @@ class Environment:
             if agent.get_flag_problem_solved():
                 self.problem_solved_flags[agent.id] = 1
 
-    def send_message(self, sender, recipient, content, recursion_depth=0):
-        print(f"send_message({sender},{recipient},{content},{recursion_depth}")
+    def send_message(self, content, recursion_depth=0):
+        print(f"send_message({content},{recursion_depth})")
         self.all_agents_solved()
         if np.sum(self.problem_solved_flags) > len(self.agents)/2 or recursion_depth >= self.max_recursion_depth:
             print("Problem solved!\n")
@@ -31,16 +31,27 @@ class Environment:
                     json.dump(agent.get_memory(), file, indent=4)
             return
 
-        agent_response_list = []
+        # Allow all agents to respond to the message
+        responses = []
         for agent in self.agents:
-            if f"Agent {agent.id}" != sender:
-                response = agent.respond(content)
-                agent_response_list.append([agent,response])
+            print(f"Agent {agent.id} is responding to {content}.")
+            response = agent.respond(content)
+            formatted_response = f"Agent {agent.id} says: {response}"
+            responses.append(formatted_response)
             time.sleep(5)
-        for agent_response in agent_response_list:
-            agent = agent_response[0]
-            response = agent_response[1]
-            self.send_message(f"Agent {agent.id}", self.parse_recipient(response), response, recursion_depth + 1)
+
+        # If there is no more recursion depth, return
+        if recursion_depth+1 >= self.max_recursion_depth:
+            return
+
+        # Create a new list of messages to send, combining individual and combined responses
+        messages_to_send = []
+        messages_to_send.extend(responses)
+
+        combined_message = '\n'.join(responses)
+
+        # Call send_message recursively for each message in the list
+        self.send_message(combined_message, recursion_depth + 1)
 
 
     def parse_recipient(self, message):

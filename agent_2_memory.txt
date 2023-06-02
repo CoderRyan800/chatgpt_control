@@ -13,7 +13,7 @@
     },
     {
         "role": "user",
-        "content": "Agent 1, if A is true then B is also true.  What is the truth value of C?"
+        "content": "Agent 2, if A is true then B is also true.  What is the truth value of C?"
     },
     {
         "role": "assistant",
@@ -21,11 +21,11 @@
     },
     {
         "role": "user",
-        "content": "Agent 1, this is Agent K.  I do not know the answer.  I only know that B is False."
+        "content": "Agent 2, this is Agent K.  I do not know the answer.  I only know that B is False."
     },
     {
         "role": "user",
-        "content": "Agent 1, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
+        "content": "Agent 2, this is Agent K+1.  I do not know the answer.  I know that either A or C must be True but not both, so A exclusive-or C."
     },
     {
         "role": "assistant",
