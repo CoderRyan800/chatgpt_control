@@ -1,4 +1,4 @@
-def generate_agent_instructions(agent_id, 
+def generate_agent_instructions(agent_id, num_agents,
                                 string_answer_known = 'I know the answer',
                                 string_answer_unknown = 'I do not know the answer',
                                 string_unsolvable = 'I cannot solve the problem'):
@@ -11,7 +11,7 @@ def generate_agent_instructions(agent_id,
         },
         {
             "role": "user", "content": 
-            f"Your name is Agent {agent_id}. You are one of multiple system Agents. " +
+            f"Your name is Agent {agent_id}. You are one of {num_agents} system Agents. " +
             f"You must respond to any message addressed to you as Agent {agent_id}, " +
             "and you must respond to any message addressed to all Agents. " +
             "You must not respond to a message addressed to another agent, " +
@@ -26,7 +26,7 @@ def generate_agent_instructions(agent_id,
             "example, if you must ask all agents what color Bob's shirt is, then say, " +
             "'All Agents, please tell me the color of Bob's shirt'.  You must start " +
             "your strings with 'Agent k' where k is an integer in the range 0 to N-1 " +
-            "where N is the number of agents or with 'All Agents'.  This instruction is " +
+            f"where N = {num_agents} is the number of agents or with 'All Agents'.  This instruction is " +
             "very critical to allow the Agents to know who is being addressed.  " +
             "If you are asked a question, and if you have enough knowledge to answer, " +
             f"always start your reply with '{string_answer_known}'.  If you lack enough " +
@@ -38,9 +38,9 @@ def generate_agent_instructions(agent_id,
             "logical derivation to show the correctness of your answer.  If you do not know, " +
             f"then in addition to saying, '{string_answer_unknown}', ask other Agents to help " +
             "you by addressing a question to all agents or to a specific agent.  If after " +
-            "about 5 * (number of agents) conversation you cannot solve the problem, you may say " +
+            f"about 5 * {num_agents} conversation turns you cannot solve the problem, you may say " +
             f"'{string_unsolvable}'.  You must not say this unless you have " +
-            "gone through the specified number of rounds of conversation with otehr agents and they cannot " +
+            f"gone through the specified number of rounds of conversation with all {num_agents} agents and they cannot " +
             "provide you with enough information to solve the problem.  Of course, it does " +
             "not make sense for you to address messages to yourself because you cannot gain " +
             "knowledge by talking to yourself.  When you reply to Agent k, you must " +
@@ -56,11 +56,13 @@ def generate_agent_instructions(agent_id,
             f"use the stirng '{string_answer_known}' to start my response.  If I do not know the " +
             f"answer to a problem, I will use the string '{string_answer_unknown}' to start " +
             "my response and will speak to other Agents to get information to solve the " +
-            "problem.  If after about five * number_of_agents iterations of the conversation the problem " +
+            f"problem.  If after about five * {num_agents} iterations of the conversation the problem " +
             "cannot be solved, I will give up and start my response with " +
             f"'{string_unsolvable}' but I will not give up without conversing with " +
             "other agents to attempt to solve the problem first.  When I speak to" +
-            f"another Agent, I will start with 'Agent k, this is Agent {agent_id}'."
+            f"another Agent, I will start with 'Agent k, this is Agent {agent_id}'.  I will wait until all " +
+            f"{num_agents} agents from 0 through {num_agents-1} have participated before concluding the problem " +
+            "is not solvable."
         },
         {
             "role":"user", "content":
@@ -75,12 +77,12 @@ def generate_agent_instructions(agent_id,
         },
         {
             "role":"user","content":
-            f"Agent {agent_id}, this is Agent K.  {string_answer_unknown}.  " +
+            f"Agent {agent_id}, this is Agent {(agent_id+1) % num_agents}.  {string_answer_unknown}.  " +
             "I only know that B is False."
         },
         {
             "role":"user","content":
-            f"Agent {agent_id}, this is Agent K+1.  {string_answer_unknown}.  " +
+            f"Agent {agent_id}, this is Agent {(agent_id+2) % num_agents}.  {string_answer_unknown}.  " +
             "I know that either A or C must be " +
             "True but not both, so A exclusive-or C."
         },

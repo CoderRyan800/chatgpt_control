@@ -3,7 +3,7 @@
 from environment import Environment
 
 def main():
-    num_agents = 5
+    num_agents = 2
     recursive_limit = 10
     env = Environment(num_agents, recursive_limit)
 

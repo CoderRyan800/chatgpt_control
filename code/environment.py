@@ -1,12 +1,14 @@
 import os
 import json
 import time
+import numpy as np
 from agent import Agent
 
 class Environment:
     def __init__(self, num_agents, max_recursion_depth):
         self.agents = []
         self.max_recursion_depth = max_recursion_depth
+        self.problem_solved_flags = np.zeros((num_agents,))
         for i in range(num_agents):
             memory_file = f"agent_{i}_memory.txt"
             if os.path.isfile(memory_file):
@@ -17,33 +19,29 @@ class Environment:
     def all_agents_solved(self):
         for agent in self.agents:
             if agent.get_flag_problem_solved():
-                return True
-        return False
+                self.problem_solved_flags[agent.id] = 1
 
     def send_message(self, sender, recipient, content, recursion_depth=0):
         print(f"send_message({sender},{recipient},{content},{recursion_depth}")
-        if self.all_agents_solved() or recursion_depth >= self.max_recursion_depth:
+        self.all_agents_solved()
+        if np.sum(self.problem_solved_flags) > len(self.agents)/2 or recursion_depth >= self.max_recursion_depth:
+            print("Problem solved!\n")
             for agent in self.agents:
                 with open(f"agent_{agent.id}_final_memory.txt", 'w') as file:
-                    json.dump(agent.get_memory(), file)
+                    json.dump(agent.get_memory(), file, indent=4)
             return
 
-        if recipient == "All Agents":
-            agent_response_list = []
-            for agent in self.agents:
-                if f"Agent {agent.id}" != sender:
-                    response = agent.respond(content)
-                    agent_response_list.append([agent,response])
-                time.sleep(80)
-            for agent_response in agent_response_list:
-                agent = agent_response[0]
-                response = agent_response[1]
-                self.send_message(f"Agent {agent.id}", self.parse_recipient(response), response, recursion_depth + 1)
-        else:
-            recipient_id = int(recipient.split(" ")[1])
-            if f"Agent {recipient_id}" != sender:
-                response = self.agents[recipient_id].respond(content)
-                self.send_message(f"Agent {recipient_id}", self.parse_recipient(response), response, recursion_depth + 1)
+        agent_response_list = []
+        for agent in self.agents:
+            if f"Agent {agent.id}" != sender:
+                response = agent.respond(content)
+                agent_response_list.append([agent,response])
+            time.sleep(5)
+        for agent_response in agent_response_list:
+            agent = agent_response[0]
+            response = agent_response[1]
+            self.send_message(f"Agent {agent.id}", self.parse_recipient(response), response, recursion_depth + 1)
+
 
     def parse_recipient(self, message):
         if "All Agents" in message:
