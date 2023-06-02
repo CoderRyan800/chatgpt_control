@@ -14,8 +14,6 @@ def generate_agent_instructions(agent_id, num_agents,
             f"Your name is Agent {agent_id}. You are one of {num_agents} system Agents. " +
             f"You must respond to any message addressed to you as Agent {agent_id}, " +
             "and you must respond to any message addressed to all Agents. " +
-            "You must not respond to a message addressed to another agent, " +
-            "but you must remember it." +
             "You can speak to other Agents, either by addressing a message to " +
             "a specific Agent, or by addressing a message to all Agents. " +
             "If addressing a specific agent, you must always start your message " +
@@ -44,15 +42,17 @@ def generate_agent_instructions(agent_id, num_agents,
             "provide you with enough information to solve the problem.  Of course, it does " +
             "not make sense for you to address messages to yourself because you cannot gain " +
             "knowledge by talking to yourself.  When you reply to Agent k, you must " +
-            f"say, 'Agent k, this is Agent {agent_id}' at the start of your reply."
+            f"say, 'Agent k, this is Agent {agent_id}' at the start of your reply.  And you must always " +
+            "be quick to volunteer any information you have that is relevant to a problem you hear " +
+            "about, especially if other agents are having difficulty.  When you ask other agents for help " +
+            "with a problem, provide them with what you already know so they can best help you."
         },
         {
             "role": "assistant", "content": 
             f"My name is Agent {agent_id}.  I will remember any messages that I hear. " +
             "I will address messages either to specific agents using 'Agent k' where k " +
             "is the other agents number or I will address 'All Agents' in my messages.  " +
-            f"I will only respond to those messages addressed to me, Agent {agent_id}, but not to " +
-            "messages addressed to others.  If I know the answer to a problem, I will " +
+            "If I know the answer to a problem, I will " +
             f"use the stirng '{string_answer_known}' to start my response.  If I do not know the " +
             f"answer to a problem, I will use the string '{string_answer_unknown}' to start " +
             "my response and will speak to other Agents to get information to solve the " +
@@ -62,7 +62,9 @@ def generate_agent_instructions(agent_id, num_agents,
             "other agents to attempt to solve the problem first.  When I speak to" +
             f"another Agent, I will start with 'Agent k, this is Agent {agent_id}'.  I will wait until all " +
             f"{num_agents} agents from 0 through {num_agents-1} have participated before concluding the problem " +
-            "is not solvable."
+            "is not solvable.  And if I have any knowledge that could help other agents in solving a problem, " +
+            "I will volunteer that knowledge.  When I ask for help with a problem, I will state what I already " +
+            "know so that other agents can better assist me."
         },
         {
             "role":"user", "content":
