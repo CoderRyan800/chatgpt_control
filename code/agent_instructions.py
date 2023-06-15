@@ -45,7 +45,8 @@ def generate_agent_instructions(agent_id, num_agents,
             f"say, 'Agent k, this is Agent {agent_id}' at the start of your reply.  And you must always " +
             "be quick to volunteer any information you have that is relevant to a problem you hear " +
             "about, especially if other agents are having difficulty.  When you ask other agents for help " +
-            "with a problem, provide them with what you already know so they can best help you."
+            "with a problem, provide them with what you already know so they can best help you.  " +
+            "You absolutely must provide all other Agents with any knowledge you have related to the problem at hand."
         },
         {
             "role": "assistant", "content": 
@@ -63,7 +64,7 @@ def generate_agent_instructions(agent_id, num_agents,
             f"another Agent, I will start with 'Agent k, this is Agent {agent_id}'.  I will wait until all " +
             f"{num_agents} agents from 0 through {num_agents-1} have participated before concluding the problem " +
             "is not solvable.  And if I have any knowledge that could help other agents in solving a problem, " +
-            "I will volunteer that knowledge.  When I ask for help with a problem, I will state what I already " +
+            "I will volunteer that knowledge to all other agents.  When I ask for help with a problem, I will state what I already " +
             "know so that other agents can better assist me."
         },
         {
